@@ -15,6 +15,14 @@ defmodule FinancialSystem.Account do
     timestamps()
   end
 
+  def changeset(struct \\ %__MODULE__{}, %{} = params) do
+    struct
+    |> cast(params, @required_fields)
+    |> validate_number(:balance, greater_than_or_equal_to: 0)
+    |> validate_inclusion(:currency, Currency.currencies_string())
+    |> unique_constraint(:owner)
+  end
+
   def create(%{} = params) do
     try do
       params
@@ -26,20 +34,18 @@ defmodule FinancialSystem.Account do
     end
   end
 
-  def changeset(struct \\ %__MODULE__{}, %{} = params) do
-    struct
-    |> cast(params, @required_fields)
-    |> validate_number(:balance, greater_than_or_equal_to: 0)
-    |> validate_inclusion(:currency, Currency.currencies_string())
-    |> unique_constraint(:owner)
-  end
-
   def find(account_id) do
     Repo.get!(Account, account_id)
   end
 
   def find_by_owner(owner) do
     Repo.get_by!(Account, owner: owner)
+  end
+
+  defp handle_insert({:ok, %Account{}} = changeset), do: changeset
+
+  defp handle_insert({:error, changeset}) do
+    {:error, %{status: :bad_request, result: changeset}}
   end
 
   def update(%__MODULE__{} = account, params) do
@@ -58,11 +64,5 @@ defmodule FinancialSystem.Account do
     account = find(account_id)
 
     update(account, %{currency: to_currency, balance: trunc(account.balance * exchange_rate)})
-  end
-
-  defp handle_insert({:ok, %Account{}} = changeset), do: changeset
-
-  defp handle_insert({:error, changeset}) do
-    {:error, %{status: :bad_request, result: changeset}}
   end
 end
