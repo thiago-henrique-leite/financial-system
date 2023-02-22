@@ -33,10 +33,11 @@ defmodule FinancialSystem.Services.AccountOperations do
         to_currency: to_currency
       })
 
-    with true <- exchange_rate > 0,
+    with true <- account.currency != to_currency,
          true <- Currency.valid_by_code?(to_currency),
+         true <- exchange_rate > 0,
          {:ok, %Account{balance: balance}} <-
-           Account.update_currency(account, to_currency, exchange_rate) do
+           Account.update_currency(id, to_currency, exchange_rate) do
       Transaction.successfully(transaction)
 
       {:ok, %{account_id: id, balance: balance, currency: to_currency, status: :success}}
