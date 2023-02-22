@@ -11,9 +11,10 @@ defmodule FinancialSystem.Services.AccountOperations do
       })
 
     with true <- amount > 0,
-         {:ok, %Account{balance: balance}} <- Account.update_balance(id, amount),
-         {:ok, %Transaction{}} <- Transaction.successfully(transaction) do
-      {:ok, %{account_id: id, balance: balance, operation: "deposit", status: :success}}
+         {:ok, %Account{balance: balance}} <- Account.update_balance(id, amount) do
+      Transaction.successfully(transaction)
+
+      {:ok, %{account_id: id, balance: balance, status: :success}}
     else
       _ ->
         Transaction.failed(transaction)
@@ -34,17 +35,11 @@ defmodule FinancialSystem.Services.AccountOperations do
 
     with true <- exchange_rate > 0,
          true <- Currency.valid_by_code?(to_currency),
-         {:ok, %Account{balance: balance, currency: currency}} <-
-           Account.update_currency(account, to_currency, exchange_rate),
-         {:ok, %Transaction{}} <- Transaction.successfully(transaction) do
-      {:ok,
-       %{
-         account_id: id,
-         balance: balance,
-         currency: currency,
-         operation: "exchange_currency",
-         status: :success
-       }}
+         {:ok, %Account{balance: balance}} <-
+           Account.update_currency(account, to_currency, exchange_rate) do
+      Transaction.successfully(transaction)
+
+      {:ok, %{account_id: id, balance: balance, currency: to_currency, status: :success}}
     else
       _ ->
         Transaction.failed(transaction)
@@ -68,10 +63,10 @@ defmodule FinancialSystem.Services.AccountOperations do
          true <- amount > 0,
          true <- from_account.balance >= amount,
          {:ok, %Account{balance: balance}} <- Account.update_balance(from_account.id, -amount),
-         {:ok, %Account{}} <- Account.update_balance(to_account.id, amount),
-         {:ok, %Transaction{}} <- Transaction.successfully(transaction) do
-      {:ok,
-       %{account_id: from_account.id, balance: balance, operation: "transfer", status: :success}}
+         {:ok, %Account{}} <- Account.update_balance(to_account.id, amount) do
+      Transaction.successfully(transaction)
+
+      {:ok, %{account_id: from_account.id, balance: balance, status: :success}}
     else
       _ ->
         Transaction.failed(transaction)
@@ -90,9 +85,10 @@ defmodule FinancialSystem.Services.AccountOperations do
       })
 
     with true <- account.balance >= amount,
-         {:ok, %Account{balance: balance}} <- Account.update_balance(id, -amount),
-         {:ok, %Transaction{}} <- Transaction.successfully(transaction) do
-      {:ok, %{account_id: id, operation: "withdraw", balance: balance, status: :success}}
+         {:ok, %Account{balance: balance}} <- Account.update_balance(id, -amount) do
+      Transaction.successfully(transaction)
+
+      {:ok, %{account_id: id, balance: balance, status: :success}}
     else
       _ ->
         Transaction.failed(transaction)

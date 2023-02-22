@@ -1,7 +1,7 @@
 defmodule FinancialSystem.Transaction do
   use Ecto.Schema
-
   import Ecto.Changeset
+  require Logger
 
   alias FinancialSystem.{Account, Currency, Repo, Transaction}
 
@@ -43,9 +43,21 @@ defmodule FinancialSystem.Transaction do
     |> foreign_key_constraint(:from, name: :transactions_from_account_id_fkey)
   end
 
-  def failed(%__MODULE__{} = transaction), do: update(transaction, %{status: "failed"})
+  def failed(%__MODULE__{id: id} = transaction) do
+    try do
+      update(transaction, %{status: "failed"})
+    rescue
+      _ -> Logger.error("[Transaction#Failed] Falha na atualização da transação #{id}")
+    end
+  end
 
-  def successfully(%__MODULE__{} = transaction), do: update(transaction, %{status: "success"})
+  def successfully(%__MODULE__{id: id} = transaction) do
+    try do
+      update(transaction, %{status: "success"})
+    rescue
+      _ -> Logger.error("[Transaction#Success] Falha na atualização da transação #{id}")
+    end
+  end
 
   def update(%__MODULE__{} = transaction, %{} = params) do
     transaction
