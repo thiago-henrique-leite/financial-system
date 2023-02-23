@@ -23,13 +23,9 @@ defmodule FinancialSystem.Transaction do
   end
 
   def create(%{} = params) do
-    try do
-      params
-      |> Transaction.changeset()
-      |> Repo.insert()
-    rescue
-      _ -> {:error, {:internal_server_error, "um erro inesperado aconteceu"}}
-    end
+    params
+    |> Transaction.changeset()
+    |> Repo.insert()
   end
 
   def changeset(struct \\ %__MODULE__{}, %{} = params) do

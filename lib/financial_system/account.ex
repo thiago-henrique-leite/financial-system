@@ -24,13 +24,9 @@ defmodule FinancialSystem.Account do
   end
 
   def create(%{} = params) do
-    try do
-      params
-      |> Account.changeset()
-      |> Repo.insert()
-    rescue
-      _ -> {:error, {:internal_server_error, "um erro inesperado aconteceu"}}
-    end
+    params
+    |> Account.changeset()
+    |> Repo.insert()
   end
 
   def find(account_id) do
