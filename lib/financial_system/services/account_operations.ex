@@ -59,7 +59,7 @@ defmodule FinancialSystem.Services.AccountOperations do
         from_currency: from_account.currency
       })
 
-    with true <- from_account != to_account,
+    with true <- from_account.id != to_account.id,
          true <- from_account.currency == to_account.currency,
          true <- amount > 0,
          true <- from_account.balance >= amount,
