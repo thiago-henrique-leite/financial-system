@@ -27,7 +27,6 @@ defmodule FinancialSystem.Transaction do
       params
       |> Transaction.changeset()
       |> Repo.insert()
-      |> handle_insert()
     rescue
       _ -> {:error, {:internal_server_error, "um erro inesperado aconteceu"}}
     end
@@ -63,11 +62,5 @@ defmodule FinancialSystem.Transaction do
     transaction
     |> Transaction.changeset(params)
     |> Repo.update()
-  end
-
-  defp handle_insert({:ok, %Transaction{}} = changeset), do: changeset
-
-  defp handle_insert({:error, changeset}) do
-    {:error, %{status: :bad_request, result: changeset}}
   end
 end

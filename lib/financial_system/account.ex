@@ -28,7 +28,6 @@ defmodule FinancialSystem.Account do
       params
       |> Account.changeset()
       |> Repo.insert()
-      |> handle_insert()
     rescue
       _ -> {:error, {:internal_server_error, "um erro inesperado aconteceu"}}
     end
@@ -40,12 +39,6 @@ defmodule FinancialSystem.Account do
 
   def find_by_owner(owner) do
     Repo.get_by!(Account, owner: owner)
-  end
-
-  defp handle_insert({:ok, %Account{}} = changeset), do: changeset
-
-  defp handle_insert({:error, changeset}) do
-    {:error, %{status: :bad_request, result: changeset}}
   end
 
   def update(%__MODULE__{} = account, params) do
